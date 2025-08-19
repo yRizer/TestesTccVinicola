@@ -2,9 +2,9 @@ import db from '../config/db.js';
 
 /**
  * 
- * Executes a SQL query with the provided parameters.
- * * @param {string} query - The SQL query to execute.
- * * @param {Array} [params=[]] - The parameters to bind to the query.
+ * * Executes a SQL query with the provided parameters.
+ * @param {string} query - The SQL query to execute.
+ * @param {Array} [params=[]] - The parameters to bind to the query.
  * @throws {Error} If the query execution fails.
  * @returns {Promise<Array>} The rows returned by the query.
  * 
@@ -20,7 +20,8 @@ async function execute(query, params = []) {
     }
 }
 
-/** * Retrieves all items from the 'itens_qr' table.
+/** 
+ * * Retrieves all items from the 'itens_qr' table.
  * @param {Array} [params=[]] - Optional parameters for the query.
  * @returns {Promise<Array>} A promise that resolves to an array of items.
  */
