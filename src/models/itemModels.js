@@ -1,5 +1,14 @@
 import db from '../config/db.js';
 
+/**
+ * 
+ * Executes a SQL query with the provided parameters.
+ * * @param {string} query - The SQL query to execute.
+ * * @param {Array} [params=[]] - The parameters to bind to the query.
+ * @throws {Error} If the query execution fails.
+ * @returns {Promise<Array>} The rows returned by the query.
+ * 
+ */
 async function execute(query, params = []) {
     const connection = await db.getConnection();
     try {
@@ -11,8 +20,12 @@ async function execute(query, params = []) {
     }
 }
 
-export async function getItemsByQRCode() {
-    const query = 'SELECT * FROM itens_qr';
+/** * Retrieves all items from the 'itens_qr' table.
+ * @param {Array} [params=[]] - Optional parameters for the query.
+ * @returns {Promise<Array>} A promise that resolves to an array of items.
+ */
+export async function getItemsByQRCode(params = []) {
+    const query = 'SELECT * FROM itens_qr WHERE qr_code = ?';
 
-    return execute(query)
+    return execute(query, params)
 }
