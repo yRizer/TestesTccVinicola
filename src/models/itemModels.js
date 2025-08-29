@@ -1,7 +1,6 @@
 import db from '../config/db.js';
 
 /**
- * 
  * * Executes a SQL query with the provided parameters.
  * @param {string} query - The SQL query to execute.
  * @param {Array} [params=[]] - The parameters to bind to the query.
@@ -10,7 +9,8 @@ import db from '../config/db.js';
  * 
  */
 async function execute(query, params = []) {
-    const connection = await db.getConnection();
+    const connection = await db;
+    
     try {
         const [rows] = await connection.query(query, params);
         return rows;
@@ -26,7 +26,26 @@ async function execute(query, params = []) {
  * @returns {Promise<Array>} A promise that resolves to an array of items.
  */
 export async function getItemsByQRCode(params = []) {
+
+    // Consulta SQL para buscar itens pelo QR Code
     const query = 'SELECT * FROM itens_qr WHERE qr_code = ?';
 
-    return execute(query, params)
+    // Executa a consulta no banco de dados
+    let [item] = await execute(query, params);
+
+    // Se nenhum item for encontrado, retorna um array vazio
+    if (!item) {
+        return [];
+    }
+
+    // Consulta SQL para buscar imagens associadas ao item
+    const images = await execute(
+        "SELECT imagem_url FROM imagens_itens WHERE item_id = ?",
+        [item.id]
+    );
+
+    // Adiciona as URLs das imagens ao objeto do item
+    item.images = images.map(img => img.imagem_url);
+
+    return [item];
 }

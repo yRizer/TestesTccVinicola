@@ -1,11 +1,8 @@
 import fastify from 'fastify';
-import routesQR from "./routes/routes.js";
+import routesQR from './routes/routes.js';
 
-// Cria uma instância do servidor Fastify
-const server = fastify();
+const app = fastify({ logger: true });
 
-// Registra as rotas para QR code
-server.register(routesQR);
+app.register(routesQR);
 
-// Exporta o servidor Fastify para ser usado em outros módulos.
-export default server;
+export default app;
