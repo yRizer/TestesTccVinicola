@@ -1,13 +1,17 @@
 import app from './app.js';
 
-// Inicia o servidor Fastify
-app.listen({
-    port: 3333,
-    host: '0.0.0.0'
-}, (err, address) => {
-    if (err) {
-        console.error(err);
+(async () => {
+    try {
+        await app.listen({ port: 3333, host: '0.0.0.0' });
+        app.log.info('Servidor rodando em http://0.0.0.0:3333');
+    } catch (err) {
+        app.log.error(err);
         process.exit(1);
     }
-    console.log(`Servidor rodando em ${address}`);
+})();
+
+process.on('SIGINT', async () => {
+    app.log.info('Recebeu SIGINT. Encerrando...');
+    try { await app.close(); } catch (e) { app.log.error(e); }
+    process.exit(0);
 });

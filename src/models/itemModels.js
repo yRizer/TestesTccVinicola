@@ -9,7 +9,7 @@ import db from '../config/db.js';
  * 
  */
 async function execute(query, params = []) {
-    const connection = await db.getConnection();
+    const connection = await db;
     
     try {
         const [rows] = await connection.query(query, params);
