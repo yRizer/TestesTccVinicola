@@ -5,7 +5,7 @@ dotenv.config();
 
 const env = process.env;
 
-console.log(env)
+console.log(env.MYSQL_HOST, env.MYSQL_USER, env.MYSQL_PASSWORD, env.MYSQL_DATABASE)
 
 if (!env) {
     throw new Error('Failed to load environment variables from .env file');
