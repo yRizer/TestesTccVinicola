@@ -5,6 +5,8 @@ dotenv.config();
 
 const env = process.env;
 
+console.log(env)
+
 if (!env) {
     throw new Error('Failed to load environment variables from .env file');
 }
