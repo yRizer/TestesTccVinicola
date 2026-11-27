@@ -1,24 +1,22 @@
-import mysql from 'mysql2/promise'
-import dotenv from 'dotenv'
+import mysql from 'mysql2/promise';
+import dotenv from 'dotenv';
 
 dotenv.config();
 
 const env = process.env;
 
-console.log(env.MYSQL_HOST, env.MYSQL_USER, env.MYSQL_PASSWORD, env.MYSQL_DATABASE)
-
-if (!env) {
-    throw new Error('Failed to load environment variables from .env file');
-}
-
-let db = mysql.createConnection({
-    host: env.MYSQL_HOST,
-    user: env.MYSQL_USER,
-    password: env.MYSQL_PASSWORD,
-    database: env.MYSQL_DATABASE,
+// Pool de conexões: reaproveita conexões e reconecta sozinho se o banco cair.
+// As credenciais vêm do .env (veja .env.example) e nunca são impressas no log.
+const db = mysql.createPool({
+    host: env.MYSQL_HOST || 'localhost',
+    port: Number(env.MYSQL_PORT) || 3306,
+    user: env.MYSQL_USER || 'root',
+    password: env.MYSQL_PASSWORD || '',
+    database: env.MYSQL_DATABASE || 'vinicola_tcc',
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0
+    queueLimit: 0,
+    dateStrings: true,
 });
 
 export default db;
