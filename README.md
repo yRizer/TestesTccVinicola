@@ -1,43 +1,28 @@
 # API da Vinícola (TCC)
 
-Back-end do meu TCC de Engenharia de Computação na Unipinhal. Cada item da vinícola recebe um QR code; ao ler o código, o app consulta esta API e recebe os dados do item com as suas imagens, guardados em MySQL.
+Back-end do meu TCC de Engenharia de Computação na Unipinhal. Cada item da vinícola recebe um QR code; ao ler o código, o app consulta esta API e recebe os dados do item com as suas imagens. A API também cuida do cadastro e login dos visitantes e das reservas de visitas, tudo em MySQL.
 
 ## Stack
 
-- Node.js (ES Modules)
-- Fastify 5
-- MySQL com `mysql2`
-- `dotenv` para a configuração
-
-## Endpoint
-
-| Método | Rota | Descrição |
-| --- | --- | --- |
-| `GET` | `/qr-info/:qrcode` | Retorna o item ligado ao QR code, com a lista de imagens. O código é validado antes da consulta (formato `QR` + 3 dígitos, ex.: `QR001`). |
-
-Exemplo de resposta:
-
-```json
-{
-  "status": "success",
-  "data": [
-    { "id": 1, "qr_code": "QR001", "images": ["/images/..."] }
-  ]
-}
-```
+- Node.js (ES Modules) com Fastify 5
+- MySQL com `mysql2` (pool de conexões)
+- Senhas com `bcryptjs`, CORS com `@fastify/cors`
+- Docker Compose para subir API + banco com um comando
 
 ## Como rodar
 
-1. Crie o banco com os scripts de `Database Examples/` (banco `vinicola_tcc`, tabelas `itens_qr` e `imagens_itens`).
-2. Crie um arquivo `.env` na raiz:
+### Com Docker (mais fácil)
 
-   ```env
-   MYSQL_HOST=localhost
-   MYSQL_USER=root
-   MYSQL_PASSWORD=sua_senha
-   MYSQL_DATABASE=vinicola_tcc
-   ```
+```bash
+docker compose up -d
+```
 
+Sobe o MySQL já com as tabelas e os itens de exemplo (`database/init.sql`) e a API em `http://localhost:3333`. Para ver se está no ar: `curl http://localhost:3333/`.
+
+### Sem Docker
+
+1. Crie o banco rodando `database/init.sql` no seu MySQL.
+2. Copie `.env.example` para `.env` e preencha a senha do banco.
 3. Instale e rode:
 
    ```bash
@@ -45,18 +30,47 @@ Exemplo de resposta:
    npm run dev
    ```
 
-Exemplos de requisição em `routes.http`.
+### Usando no celular
+
+O app no celular não enxerga `localhost` do computador. Use o IP do computador na rede, por exemplo `http://192.168.0.10:3333`, no `EXPO_PUBLIC_API_URL` do app.
+
+## Endpoints
+
+Todas as respostas seguem `{ "status": "success" | "error", "data"?, "message"? }`.
+
+| Método | Rota | Descrição |
+| --- | --- | --- |
+| `GET` | `/` | Health check |
+| `GET` | `/qr-info/:qrcode` | Item ligado ao QR code (`QR` + 3 dígitos), com as imagens |
+| `POST` | `/auth/register` | Cadastro: `nome`, `email`, `senha` (mín. 6), `telefone` opcional |
+| `POST` | `/auth/login` | Login com `email` e `senha`; devolve o usuário sem a senha |
+| `GET` | `/auth/user/:id` | Dados do usuário |
+| `PUT` | `/auth/user/:id` | Atualiza `nome` e `telefone` |
+| `POST` | `/reservations` | Cria reserva (valida data futura, horário, tipo de tour e vagas) |
+| `GET` | `/reservations/check-availability/:data/:horario` | Vagas restantes no horário |
+| `GET` | `/reservations/user/:usuarioId` | Reservas do usuário |
+| `GET` | `/reservations/:id` | Uma reserva |
+| `PUT` | `/reservations/:id` | Edita a reserva |
+| `PATCH` | `/reservations/:id/status` | `pendente`, `confirmada`, `cancelada` ou `concluida` |
+| `DELETE` | `/reservations/:id` | Remove a reserva |
+
+Exemplos prontos em `routes.http`. A capacidade por horário vem de `VAGAS_POR_HORARIO` (padrão 20).
+
+## Deploy no Railway
+
+O Railway usa a branch `master`. Defina as variáveis `MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_USER`, `MYSQL_PASSWORD` e `MYSQL_DATABASE` (as do plugin MySQL do Railway) e rode `database/init.sql` uma vez no banco. A porta vem de `PORT`, que o Railway define sozinho.
 
 ## Estrutura
 
 ```
+database/init.sql   tabelas + dados de exemplo
 src/
-  server.js     inicia o servidor
-  app.js        instancia o Fastify e registra as rotas
-  routes/       rotas de QR code
-  models/       consultas ao MySQL
-  security/     validação do formato do QR code
-  config/       conexão com o banco
+  server.js         inicia o servidor
+  app.js            Fastify, CORS e registro das rotas
+  routes/           QR code, autenticação e reservas
+  models/           consultas ao MySQL
+  security/         validações (QR code, e-mail, data, horário, reserva)
+  config/           pool de conexão com o banco
 ```
 
 ---
